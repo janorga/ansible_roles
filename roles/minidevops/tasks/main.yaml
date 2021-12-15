@@ -1,0 +1,22 @@
+---
+
+- name: Update package cache
+  apt:
+    update_cache: yes
+
+- name: Clone minidevops repo
+  git:
+     repo: 'https://github.com/janorga/minidevops'
+     dest: /root/minidevops
+     version: only-nexus
+
+- name: Create a directory if it does not exist
+  ansible.builtin.file:
+    path: /root/minidevops/nginx/certs
+    state: directory
+    mode: '0755'
+
+- name: Generate DH Parameters
+  community.crypto.openssl_dhparam:
+    path: /root/minidevops/nginx/certs/dhparams.pem
+    size: 2048
