@@ -1,0 +1,22 @@
+---
+
+- name: Prepare Network
+  include_tasks: prepare_network.yaml
+
+- name: Flush handlers
+  meta: flush_handlers
+
+- name: LXD Init
+  include_tasks: lxd_init.yaml
+
+- name: Create container
+  include_tasks: create_container.yaml
+
+- name: Flush handlers
+  meta: flush_handlers
+
+- name: Configure Microk8s
+  include_tasks: config_uk8s.yaml
+
+- name: Configure ArgoCD
+  include_tasks: config_argo.yaml
