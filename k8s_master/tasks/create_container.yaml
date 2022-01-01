@@ -34,8 +34,8 @@
     dest: /tmp/microk8s_rc.local
 
 - name: Copying tmp files (microk8s_netplan.yaml) to lxd_host
-  ansible.builtin.copy:
-    src: ../files/microk8s_netplan.yaml
+  ansible.builtin.template:
+    src: ../files/microk8s_netplan.j2
     dest: /tmp/microk8s_netplan.yaml
 
 - name: Copying rc.local to microk8s

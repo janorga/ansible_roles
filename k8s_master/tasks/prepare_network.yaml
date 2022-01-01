@@ -2,7 +2,7 @@
 
 - name: Copy netplan file
   become: true
-  ansible.builtin.copy:
-    src: ../files/60-bridge.yaml
-    dest: /etc/netplan/
+  ansible.builtin.template:
+    src: ../files/60-bridge.j2
+    dest: /etc/netplan/60-bridge.yaml
   notify: Reboot

@@ -1,8 +1,8 @@
 ---
 
 - name: Copy config script
-  ansible.builtin.copy:
-    src: ../files/config_uk8s.sh
+  ansible.builtin.template:
+    src: ../files/config_uk8s.j2
     dest: /tmp/config_uk8s.sh
 
 - name: Copy ingress def
@@ -21,7 +21,7 @@
     removes: /tmp/ingress-service.yaml
 
 - name: Execute script to LXD container
-  ansible.builtin.command: lxc exec microk8s -- bash -c 'cd /tmp && bash config_uk8s.sh'
+  ansible.builtin.command: lxc exec microk8s -- bash -c 'sleep 2 && cd /tmp && bash config_uk8s.sh'
 
 - name: Apply MetalLb ingress in Microk8s
   ansible.builtin.command: lxc exec microk8s -- microk8s kubectl apply -f /tmp/ingress-service.yaml
