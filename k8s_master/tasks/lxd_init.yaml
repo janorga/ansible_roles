@@ -3,5 +3,5 @@
 - name: "LXD preseed"
   ansible.builtin.command: lxd init --preseed <
   args:
-    stdin: "{{ lookup('file', '../files/preseed.yaml') }}"
+    stdin: "{{ lookup('template', '../files/preseed.j2') }}"
 
