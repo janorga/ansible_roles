@@ -6,9 +6,13 @@
     dest: /tmp/config_argo.sh
 
 - name: Push config script to LXD container
-  ansible.builtin.command: lxc file push /tmp/config_argo.sh microk8s/tmp/config_argo.sh
+  ansible.builtin.shell: lxc file push /tmp/config_argo.sh microk8s/tmp/config_argo.sh && sleep 2 && lxc exec microk8s -- stat /tmp/config_argo.sh
   args:
-    removes: /tmp/config_uk8s.sh
+    removes: /tmp/config_argo.sh
+  register: config_argo
+  until: config_argo is succeeded
+  retries: 5
+  delay: 2
 
 - debug:
     msg: "The following tasks install ArgoCD on cluster, it may take up to aprox. 20 minutes"

@@ -11,17 +11,25 @@
     dest: /tmp/ingress-service.yaml
 
 - name: Push config script to LXD container
-  ansible.builtin.command: lxc file push /tmp/config_uk8s.sh microk8s/tmp/config_uk8s.sh
+  ansible.builtin.shell: lxc file push /tmp/config_uk8s.sh microk8s/tmp/config_uk8s.sh && sleep 2 && lxc exec microk8s -- stat /tmp/config_uk8s.sh
   args:
     removes: /tmp/config_uk8s.sh
-
+  register: stat_config_uk8s
+  until: stat_config_uk8s is succeeded
+  retries: 5
+  delay: 2
+  
 - name: Push ingress def to LXD container
-  ansible.builtin.command: lxc file push /tmp/ingress-service.yaml microk8s/tmp/ingress-service.yaml
+  ansible.builtin.shell: lxc file push /tmp/ingress-service.yaml microk8s/tmp/ingress-service.yaml && sleep 2 && lxc exec microk8s -- stat /tmp/ingress-service.yaml
   args:
     removes: /tmp/ingress-service.yaml
+  register: stat_ingress_service
+  until: stat_ingress_service is succeeded
+  retries: 5
+  delay: 2
 
 - name: Execute script to LXD container
-  ansible.builtin.command: lxc exec microk8s -- bash -c 'sleep 2 && cd /tmp && bash config_uk8s.sh'
+  ansible.builtin.command: lxc exec microk8s -- bash -c 'cd /tmp && bash config_uk8s.sh'
 
 - name: Apply MetalLb ingress in Microk8s
   ansible.builtin.command: lxc exec microk8s -- microk8s kubectl apply -f /tmp/ingress-service.yaml

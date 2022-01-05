@@ -1,6 +1,22 @@
 ---
 
-- name: Copy netplan file
+- name: Install apache openvswitch
+  become: true
+  apt:
+    name: openvswitch-switch
+    state: present
+
+- name: Create OVS bridge
+  become: true
+  openvswitch.openvswitch.openvswitch_bridge:
+    bridge: bridge0
+    state: present
+
+- name: UP interface
+  become: true
+  ansible.builtin.command: ip link set bridge0 up
+
+- name: Copy netplan file and notify reboot to get IP connectivity
   become: true
   ansible.builtin.template:
     src: ../files/60-bridge.j2

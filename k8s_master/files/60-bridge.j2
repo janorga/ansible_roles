@@ -2,11 +2,7 @@ network:
   version: 2
   renderer: networkd
 
-network:
-  version: 2
-  renderer: networkd
-
-  bridges:
+  ethernets:
     bridge0:
       dhcp4: no
       addresses: [{{ master_host_ip }}]
