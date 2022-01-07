@@ -11,7 +11,7 @@
     dest: /tmp/ingress-service.yaml
 
 - name: Push config script to LXD container
-  ansible.builtin.shell: lxc file push /tmp/config_uk8s.sh microk8s/tmp/config_uk8s.sh && sleep 2 && lxc exec microk8s -- stat /tmp/config_uk8s.sh
+  ansible.builtin.shell: lxc file push /tmp/config_uk8s.sh "{{ container_name }}"/tmp/config_uk8s.sh && sleep 2 && lxc exec "{{ container_name }}" -- stat /tmp/config_uk8s.sh
   args:
     removes: /tmp/config_uk8s.sh
   register: stat_config_uk8s
@@ -20,7 +20,7 @@
   delay: 2
   
 - name: Push ingress def to LXD container
-  ansible.builtin.shell: lxc file push /tmp/ingress-service.yaml microk8s/tmp/ingress-service.yaml && sleep 2 && lxc exec microk8s -- stat /tmp/ingress-service.yaml
+  ansible.builtin.shell: lxc file push /tmp/ingress-service.yaml "{{ container_name }}"/tmp/ingress-service.yaml && sleep 2 && lxc exec "{{ container_name }}" -- stat /tmp/ingress-service.yaml
   args:
     removes: /tmp/ingress-service.yaml
   register: stat_ingress_service
@@ -29,17 +29,17 @@
   delay: 2
 
 - name: Execute script to LXD container
-  ansible.builtin.command: lxc exec microk8s -- bash -c 'cd /tmp && bash config_uk8s.sh'
+  ansible.builtin.command: lxc exec "{{ container_name }}" -- bash -c 'cd /tmp && bash config_uk8s.sh'
 
-- name: Apply MetalLb ingress in Microk8s
-  ansible.builtin.command: lxc exec microk8s -- microk8s kubectl apply -f /tmp/ingress-service.yaml
+- name: Apply MetalLb ingress in "{{ container_name }}"
+  ansible.builtin.command: lxc exec "{{ container_name }}" -- microk8s kubectl apply -f /tmp/ingress-service.yaml
 
 - name: Get kubeconfig
-  ansible.builtin.command: lxc exec microk8s -- microk8s config
+  ansible.builtin.command: lxc exec "{{ container_name }}" -- microk8s config
   register: kubeconfig
 
 - name: Copy kubeconfig to /root/.kube/config
-  ansible.builtin.command: lxc exec microk8s -- bash -c 'echo "{{ kubeconfig.stdout }}" > /root/.kube/config'
+  ansible.builtin.command: lxc exec "{{ container_name }}" -- bash -c 'echo "{{ kubeconfig.stdout }}" > /root/.kube/config'
 
 - name: Copy kubeconfig to localfile in /tmp/kubeconfig
   become: false

@@ -1,5 +1,6 @@
 ---
 
+container_name: "microk8s"
 lxd_poolsize: "200GB"
 metallb_range: "10.5.0.100-10.5.0.200"
 master_host_ip: "10.5.0.1/24"

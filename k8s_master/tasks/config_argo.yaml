@@ -6,7 +6,7 @@
     dest: /tmp/config_argo.sh
 
 - name: Push config script to LXD container
-  ansible.builtin.shell: lxc file push /tmp/config_argo.sh microk8s/tmp/config_argo.sh && sleep 2 && lxc exec microk8s -- stat /tmp/config_argo.sh
+  ansible.builtin.shell: lxc file push /tmp/config_argo.sh "{{ container_name }}"/tmp/config_argo.sh && sleep 2 && lxc exec "{{ container_name }}" -- stat /tmp/config_argo.sh
   args:
     removes: /tmp/config_argo.sh
   register: config_argo
@@ -18,21 +18,21 @@
     msg: "The following tasks install ArgoCD on cluster, it may take up to aprox. 20 minutes"
 
 - name: Execute script to LXD container
-  ansible.builtin.command: lxc exec microk8s -- bash -c 'cd /tmp && bash config_argo.sh'
+  ansible.builtin.command: lxc exec "{{ container_name }}" -- bash -c 'cd /tmp && bash config_argo.sh'
 
 - name: Gather ArgoCD passwd
-  ansible.builtin.command: lxc exec microk8s -- bash -c 'kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo'
+  ansible.builtin.command: lxc exec "{{ container_name }}" -- bash -c 'kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo'
   register: argo_passwd_out
 
 - set_fact: argo_passwd="{{ argo_passwd_out.stdout }}"
 
 - name: Gather ArgoCD IP
-  ansible.builtin.command: lxc exec microk8s -- kubectl get svc -n argocd argocd-server --output jsonpath='{.status.loadBalancer.ingress[0].ip}'
+  ansible.builtin.command: lxc exec "{{ container_name }}" -- kubectl get svc -n argocd argocd-server --output jsonpath='{.status.loadBalancer.ingress[0].ip}'
   register: argo_ip_out
 
 - set_fact: argo_ip="{{ argo_ip_out.stdout }}"
 
 - debug: 
     msg: 
-      - "ArgoCD password is: {{ hostvars[groups['lxd_host'][0]]['argo_passwd'] }}"
-      - "AgoCD LoadBalancer IP is: {{ hostvars[groups['lxd_host'][0]]['argo_ip'] }}"
+      - "ArgoCD password is: {{ hostvars[container_name]['argo_passwd'] }}"
+      - "AgoCD LoadBalancer IP is: {{ hostvars[container_name]['argo_ip'] }}"

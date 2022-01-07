@@ -2,7 +2,7 @@
 
 - name: Create a started container
   community.general.lxd_container:
-    name: microk8s
+    name: "{{ container_name }}"
     ignore_volatile_options: true
     state: started
     source:
@@ -16,17 +16,17 @@
     timeout: 600
 
 - name: Adding second interface
-  ansible.builtin.command: lxc config device add microk8s eth1 nic name=eth1 nictype=bridged parent=bridge0
+  ansible.builtin.command: lxc config device add "{{ container_name }}" eth1 nic name=eth1 nictype=bridged parent=bridge0
 
 - name: Adding bridge profile
-  ansible.builtin.command: lxc profile assign microk8s default,microk8s,bridgeprofile
-# notify: Restart microk8s
+  ansible.builtin.command: lxc profile assign "{{ container_name }}" default,microk8s,bridgeprofile
+# notify: Restart "{{ container_name }}"
 
 - name: Install snapd
-  ansible.builtin.command: lxc exec microk8s -- sudo apt install snapd -y
+  ansible.builtin.command: lxc exec "{{ container_name }}" -- sudo apt install snapd -y
 
 - name: Install micrko8s
-  ansible.builtin.command: lxc exec microk8s -- sudo snap install microk8s --classic
+  ansible.builtin.command: lxc exec "{{ container_name }}" -- sudo snap install microk8s --classic
 
 - name: Copying tmp (microk8s_rc.local) files to lxd_host
   ansible.builtin.copy:
@@ -38,16 +38,16 @@
     src: ../files/microk8s_netplan.j2
     dest: /tmp/microk8s_netplan.yaml
 
-- name: Copying rc.local to microk8s
-  ansible.builtin.command: lxc file push /tmp/microk8s_rc.local microk8s/etc/rc.local
+- name: Copying rc.local to "{{ container_name }}"
+  ansible.builtin.command: lxc file push /tmp/microk8s_rc.local "{{ container_name }}"/etc/rc.local
 
-- name: Copying netplan file to microk8s
-  ansible.builtin.command: lxc file push /tmp/microk8s_netplan.yaml microk8s/etc/netplan/99-eth1.yaml
+- name: Copying netplan file to "{{ container_name }}"
+  ansible.builtin.command: lxc file push /tmp/microk8s_netplan.yaml "{{ container_name }}"/etc/netplan/99-eth1.yaml
 
-- name: Updating rc.local permissions in microk8s
-  ansible.builtin.command: lxc exec microk8s -- chmod +x /etc/rc.local 
+- name: Updating rc.local permissions in "{{ container_name }}"
+  ansible.builtin.command: lxc exec "{{ container_name }}" -- chmod +x /etc/rc.local 
   notify: 
-#   - Restart microk8s
+#   - Restart "{{ container_name }}"
     - Reboot
 
 
