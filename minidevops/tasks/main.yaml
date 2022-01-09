@@ -18,5 +18,5 @@
 
 - name: Generate DH Parameters
   community.crypto.openssl_dhparam:
-    path: /root/minidevops/nginx/certs/dhparams.pem
+    path: /root/minidevops/nginx/certs/dhparam.pem
     size: 2048
